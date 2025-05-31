@@ -51,7 +51,7 @@ const ResultsDisplay = ({
                     Maximum Stress
                   </h3>
                   <p className="text-2xl font-bold">
-                    {result.maxStress.toFixed(2)}{" "}
+                    {result.maxStress.toFixed(3)}{" "}
                     <span className="text-sm font-normal">MPa</span>
                   </p>
                 </div>

@@ -54,9 +54,9 @@ const BeamCalculator = () => {
   const [loadingParameters, setLoadingParameters] = useState<LoadingParameters>(
     {
       type: "point",
-      magnitude: 1000,
+      magnitude: 10,
       position: 1,
-      length: 2,
+      length: 1,
     },
   );
   const [calculationResult, setCalculationResult] =
@@ -82,10 +82,12 @@ const BeamCalculator = () => {
   };
 
   const handleParameterChange = (params: BeamParameters) => {
+    console.log("Beam parameters changed:", params);
     setBeamParameters(params);
   };
 
   const handleLoadingChange = (params: LoadingParameters) => {
+    console.log("Load parameters changed:", params);
     setLoadingParameters(params);
   };
 

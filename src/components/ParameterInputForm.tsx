@@ -48,16 +48,12 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
   onCalculate = () => {},
   resultsRef,
 }) => {
-  const [dimensions, setDimensions] = useState<Record<string, number>>({});
-  const [loadingType, setLoadingType] = useState<string>("point-load");
-  const [loadingParameters, setLoadingParameters] = useState<
-    Record<string, number>
-  >({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // --- Initialization ---
   const [useImperial, setUseImperial] = useState<boolean>(false);
+  const [loadingType, setLoadingType] = useState<string>("point-load");
 
-  // Define dimension fields based on beam type
-  const getDimensionFields = () => {
+  // Get initial dimension fields and loading fields
+  const getDimensionFields = React.useCallback(() => {
     switch (beamType) {
       case "i-beam":
         return [
@@ -150,10 +146,10 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
           },
         ];
     }
-  };
+  }, [beamType, useImperial]);
 
   // Define loading parameter fields based on loading type
-  const getLoadingFields = () => {
+  const getLoadingFields = React.useCallback(() => {
     switch (loadingType) {
       case "point-load":
         return [
@@ -202,35 +198,94 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
           },
         ];
     }
-  };
-
-  // Initialize default values
-  useEffect(() => {
-    const dimensionFields = getDimensionFields();
-    const initialDimensions: Record<string, number> = {};
-
-    dimensionFields.forEach((field) => {
-      initialDimensions[field.id] = field.defaultValue;
-    });
-
-    setDimensions(initialDimensions);
-  }, [beamType, useImperial]);
-
-  useEffect(() => {
-    const loadingFields = getLoadingFields();
-    const initialLoadingParams: Record<string, number> = {};
-
-    loadingFields.forEach((field) => {
-      initialLoadingParams[field.id] = field.defaultValue;
-    });
-
-    setLoadingParameters(initialLoadingParams);
   }, [loadingType, useImperial]);
 
-  //Update parent component when parameters change
-  useEffect(() => {
-    if (Object.keys(dimensions).length > 0) {
-      // Convert imperial to metric if needed before sending to parent
+  const getInitialDimensions = React.useCallback(() => {
+    const fields = getDimensionFields();
+    const obj: Record<string, number> = {};
+    fields.forEach((f) => (obj[f.id] = f.defaultValue));
+    return obj;
+  }, [getDimensionFields]);
+
+  const getInitialLoading = React.useCallback(() => {
+    const fields = getLoadingFields();
+    const obj: Record<string, number> = {};
+    fields.forEach((f) => (obj[f.id] = f.defaultValue));
+    return obj;
+  }, [getLoadingFields]);
+
+  // --- State ---
+  const [dimensions, setDimensions] = useState<Record<string, number>>(getInitialDimensions);
+  const [loadingParameters, setLoadingParameters] = useState<Record<string, number>>(getInitialLoading);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // --- Avoid loop on first render ---
+  const didInitDimensions = useRef(false);
+  const didInitLoading = useRef(false);
+
+  // // --- Effects for dimension fields ---
+  // useEffect(() => {
+  //   const initial = getInitialDimensions();
+  //   // Only update if changed
+  //   if (
+  //     !didInitDimensions.current ||
+  //     Object.keys(initial).some((k) => dimensions[k] !== initial[k])
+  //   ) {
+  //     setDimensions(initial);
+  //     didInitDimensions.current = true;
+  //   }
+    
+  // }, [beamType]);
+
+  // // --- Effects for loading fields ---
+  // useEffect(() => {
+  //   const initial = getInitialLoading();
+  //   if (
+  //     !didInitLoading.current ||
+  //     Object.keys(initial).some((k) => loadingParameters[k] !== initial[k])
+  //   ) {
+  //     setLoadingParameters(initial);
+  //     didInitLoading.current = true;
+  //   }
+   
+  // }, [loadingType]);
+
+  // // --- Propagate dimension changes ---
+  // useEffect(() => {
+  //   if (Object.keys(dimensions).length > 0) {
+  //     // Convert imperial to metric if needed before sending to parent
+  //     if (useImperial) {
+  //       const metricDimensions = { ...dimensions };
+  //       // Convert inches to mm (1 inch = 25.4 mm)
+  //       Object.keys(metricDimensions).forEach((key) => {
+  //         metricDimensions[key] = metricDimensions[key] * 25.4;
+  //       });
+  //       onBeamParametersChange(metricDimensions);
+  //     } else {
+  //       onBeamParametersChange(dimensions);
+  //     }
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [dimensions, onBeamParametersChange, useImperial]);
+
+  // // --- Propagate loading changes ---
+  // useEffect(() => {
+  //   if (Object.keys(loadingParameters).length > 0) {
+     
+  //   }
+  // }, [loadingType, loadingParameters, onLoadingParametersChange, useImperial]);
+
+  //Handle dimension input changes
+  const handleDimensionChange = (id: string, value: string) => {
+    const numValue = parseFloat(value);
+
+    if (isNaN(numValue) || numValue <= 0) {
+      setErrors({ ...errors, [id]: "Please enter a valid positive number" });
+    } else {
+      const newErrors = { ...errors };
+      delete newErrors[id];
+      setErrors(newErrors);
+      setDimensions({ ...dimensions, [id]: numValue });
       if (useImperial) {
         const metricDimensions = { ...dimensions };
         // Convert inches to mm (1 inch = 25.4 mm)
@@ -242,18 +297,27 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
         onBeamParametersChange(dimensions);
       }
     }
-  }, [dimensions, onBeamParametersChange, useImperial]);
+  };
 
-  useEffect(() => {
-    if (Object.keys(loadingParameters).length > 0) {
-      let magnitude =
+  // Handle loading parameter input changes
+  const handleLoadingParamChange = (id: string, value: string) => {
+    const numValue = parseFloat(value);
+
+    if (isNaN(numValue) || numValue <= 0) {
+      setErrors({ ...errors, [id]: "Please enter a valid positive number" });
+    } else {
+      const newErrors = { ...errors };
+      delete newErrors[id];
+      setErrors(newErrors);
+      setLoadingParameters({ ...loadingParameters, [id]: numValue });
+       let magnitude =
         loadingParameters.force ||
         loadingParameters.loadIntensity ||
         loadingParameters.moment ||
         0;
 
       let position = loadingParameters.distance;
-      let length = loadingParameters.length || 2;
+      let length = loadingParameters.length || 200;
 
       // Convert imperial to metric if needed
       if (useImperial) {
@@ -289,36 +353,10 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
 
       onLoadingParametersChange(loadingParams);
     }
-  }, [loadingType, loadingParameters, onLoadingParametersChange, useImperial]);
-
-  //Handle dimension input changes
-  const handleDimensionChange = (id: string, value: string) => {
-    const numValue = parseFloat(value);
-
-    if (isNaN(numValue) || numValue <= 0) {
-      setErrors({ ...errors, [id]: "Please enter a valid positive number" });
-    } else {
-      const newErrors = { ...errors };
-      delete newErrors[id];
-      setErrors(newErrors);
-      setDimensions({ ...dimensions, [id]: numValue });
-    }
   };
-
-  // Handle loading parameter input changes
-  const handleLoadingParamChange = (id: string, value: string) => {
-    const numValue = parseFloat(value);
-
-    if (isNaN(numValue) || numValue <= 0) {
-      setErrors({ ...errors, [id]: "Please enter a valid positive number" });
-    } else {
-      const newErrors = { ...errors };
-      delete newErrors[id];
-      setErrors(newErrors);
-      setLoadingParameters({ ...loadingParameters, [id]: numValue });
-    }
+  const handleUseImperial =  (checked: boolean) => {
+      setUseImperial(checked);
   };
-
   return (
     <Card className="w-full bg-white shadow-md">
       <CardContent className="p-6">
@@ -339,7 +377,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
                   <Switch
                     id="units-toggle"
                     checked={useImperial}
-                    onCheckedChange={setUseImperial}
+                    onCheckedChange={handleUseImperial}
                   />
                   <span className={`text-sm ${useImperial ? "font-bold" : ""}`}>
                     Imperial
@@ -355,7 +393,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
                   <Input
                     id={field.id}
                     type="number"
-                    value={dimensions[field.id] || field.defaultValue}
+                    value={dimensions[field.id] ?? ""}
                     onChange={(e) =>
                       handleDimensionChange(field.id, e.target.value)
                     }
@@ -430,7 +468,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
                     <Input
                       id={field.id}
                       type="number"
-                      value={loadingParameters[field.id] || field.defaultValue}
+                      value={loadingParameters[field.id] ?? ""}
                       onChange={(e) =>
                         handleLoadingParamChange(field.id, e.target.value)
                       }

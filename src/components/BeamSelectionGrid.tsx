@@ -62,7 +62,7 @@ const BeamSelectionGrid: React.FC<BeamSelectionGridProps> = ({
   onSelectBeam = () => {},
 }) => {
   const handleBeamSelect = (beamId: string) => {
-    //onSelectBeam(beamId);
+    onSelectBeam(beamId);
   };
 
   return (
