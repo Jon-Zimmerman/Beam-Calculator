@@ -61,7 +61,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
 }) => {
   // --- Initialization ---
   const [useImperial, setUseImperial] = useState<boolean>(false);
-  const [loadingType, setLoadingType] = useState<string>("point-load");
+  const [loadingType, setLoadingType] = useState<string>("point");
   const [materialType, setMaterialType] = useState<string>("steel");
   // Get initial dimension fields and loading fields
   const getDimensionFields = React.useCallback(() => {
@@ -96,7 +96,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
           {
             id: "height",
             label: useImperial ? "Height (in)" : "Height (mm)",
-            defaultValue: useImperial ? 3.94 : 25 , //TODO
+            defaultValue: useImperial ? 3.94 : 25, //TODO
           },
           {
             id: "width",
@@ -167,7 +167,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
   // Define loading parameter fields based on loading type
   const getLoadingFields = React.useCallback(() => {
     switch (loadingType) {
-      case "point-load":
+      case "point":
         return [
           {
             id: "force",
@@ -303,7 +303,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
   const getInitialMaterial = React.useCallback(() => {
     const fields = getMaterialFields("steel");
     const obj: Record<string, string> = {};
-    fields.forEach((f) => (obj[f.id] = f.defaultValue  as unknown as string));
+    fields.forEach((f) => (obj[f.id] = f.defaultValue as unknown as string));
     return obj;
   }, [getMaterialFields]);
 
@@ -314,7 +314,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
   const [materialParameters, setMaterialParameters] = useState<Record<string, string>>(getInitialMaterial);
 
   // // --- Avoid loop on first render ---
-   const didInitDimensions = useRef(false);
+  const didInitDimensions = useRef(false);
   // const didInitLoading = useRef(false);
 
   // --- Effects for dimension fields ---
@@ -324,59 +324,21 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
     if (
       !didInitDimensions.current ||
       Object.keys(initial).some((k) => dimensions[k] !== initial[k])
-      
+
     ) {
       onBeamParametersChange(initial);
       setDimensions(initial);
       didInitDimensions.current = true;
     }
-  
+
   }, [beamType]);
-
-  // // --- Effects for loading fields ---
-  // useEffect(() => {
-  //   const initial = getInitialLoading();
-  //   if (
-  //     !didInitLoading.current ||
-  //     Object.keys(initial).some((k) => loadingParameters[k] !== initial[k])
-  //   ) {
-  //     setLoadingParameters(initial);
-  //     didInitLoading.current = true;
-  //   }
-
-  // }, [loadingType]);
-
-  // // --- Propagate dimension changes ---
-  // useEffect(() => {
-  //   if (Object.keys(dimensions).length > 0) {
-  //     // Convert imperial to metric if needed before sending to parent
-  //     if (useImperial) {
-  //       const metricDimensions = { ...dimensions };
-  //       // Convert inches to mm (1 inch = 25.4 mm)
-  //       Object.keys(metricDimensions).forEach((key) => {
-  //         metricDimensions[key] = metricDimensions[key] * 25.4;
-  //       });
-  //       onBeamParametersChange(metricDimensions);
-  //     } else {
-  //       onBeamParametersChange(dimensions);
-  //     }
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [dimensions, onBeamParametersChange, useImperial]);
-
-  // // --- Propagate loading changes ---
-  // useEffect(() => {
-  //   if (Object.keys(loadingParameters).length > 0) {
-
-  //   }
-  // }, [loadingType, loadingParameters, onLoadingParametersChange, useImperial]);
 
   //Handle dimension input changes
   const handleDimensionChange = (id: string, value: string) => {
     const numValue = parseFloat(value as string);
-    
-      // Allow empty input for user editing
-    console.log("handleDimensionChange", value );
+
+    // Allow empty input for user editing
+    console.log("handleDimensionChange", value);
     const newDimensions = { ...dimensions, [id]: value };
     setDimensions(newDimensions);
 
@@ -429,11 +391,11 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
         numValue && (id === "force" || id === "loadIntensity" || id === "moment")
           ? numValue
           : (
-              newLoadingParams.force ||
-              newLoadingParams.loadIntensity ||
-              newLoadingParams.moment ||
-              0
-            );
+            newLoadingParams.force ||
+            newLoadingParams.loadIntensity ||
+            newLoadingParams.moment ||
+            0
+          );
       newMagnitude = parseFloat(newMagnitude as string);
       let position = id === "distance" ? numValue : newLoadingParams.distance;
       let length = id === "length" ? numValue : newLoadingParams.length || 200;
@@ -454,13 +416,13 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
         }
 
         // Convert inches to meters
-        if (position) position = position as number/ 39.37;
-        if (length) length = length as number/ 39.37;
+        if (position) position = position as number / 39.37;
+        if (length) length = length as number / 39.37;
       }
 
       const loadingParamsParent = {
         type:
-          loadingType === "point-load"
+          loadingType === "point"
             ? "point"
             : loadingType === "distributed-load"
               ? "distributed"
@@ -487,7 +449,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
     if (id === "elasticModulus" || id === "yieldStrength" || id === "density") {
       if (value === "") {
         // Allow empty input, clear error
-        newMaterialParams = { ...materialParameters, [id]: value as string};
+        newMaterialParams = { ...materialParameters, [id]: value as string };
         setMaterialParameters(newMaterialParams);
         const newErrors = { ...errors };
         delete newErrors[id];
@@ -497,7 +459,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
       parsedValue = typeof value === "string" ? parseFloat(value) : value;
       if (isNaN(parsedValue as number) || (parsedValue as number) <= 0) {
         setErrors({ ...errors, [id]: "Please enter a valid positive number" });
-        newMaterialParams = { ...materialParameters, [id]: value as string};
+        newMaterialParams = { ...materialParameters, [id]: value as string };
         setMaterialParameters(newMaterialParams);
         return;
       } else {
@@ -526,57 +488,38 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
   };
 
   const handleCalculate = () => {
-    
-    // Validate all fields before calculating
-    // const newErrors: Record<string, string> = {};
-    // dimensions.forEach((field) => {
-    //   if (!dimensions[field.id] || dimensions[field.id] <= 0) {
-    //     newErrors[field.id] = "Please enter a valid positive number";
-    //   }
-    // });
-    // getLoadingFields().forEach((field) => {
-    //   if (!loadingParameters[field.id] || loadingParameters[field.id] <= 0) {
-    //     newErrors[field.id] = "Please enter a valid positive number";
-    //   }
-    // });
-    // getMaterialFields(materialType as MaterialType).forEach((field) => {
-    //   if (!materialParameters[field.id] || materialParameters[field.id] <= 0) {
-    //     newErrors[field.id] = "Please enter a valid positive number";
-    //   }
-    // });
 
-    // if (Object.keys(newErrors).length > 0) {
-    //   setErrors(newErrors);
-    //   return;
-    // }
-
-    console.log(dimensions);
+    //console.log(dimensions);
     onBeamParametersChange(dimensions);
-    // const loadingParamsParent = {
-    //     type:
-    //       loadingType === "point-load"
-    //         ? "point"
-    //         : loadingType === "distributed-load"
-    //           ? "distributed"
-    //           : "moment" as LoadingType,
-    //     magnitude: loadingParameters.force ||
-    //       loadingParameters.loadIntensity ||  ,
-    //     position,
-    //     length,
-    //   };
-    // onLoadingParametersChange(loadingParameters);
-    // onMaterialParametersChange(materialParameters);
+    var newLoadingParameters = { ...loadingParameters };
+    var newLoadingType = loadingType;
+    const loadingParamsParent = {
+      type: newLoadingType as LoadingType,
+      magnitude: newLoadingParameters.force as unknown as number,
+      position: newLoadingParameters.distance as unknown as number,
+      length: newLoadingParameters.length as unknown as number,
+    };
+    onLoadingParametersChange(loadingParamsParent);
+
+    var newMaterialParams = { ...materialParameters };
+    var newMaterialType = materialType;
+    const materialParamsParent = {
+      type: newMaterialType as MaterialType,
+      elasticModulus: newMaterialParams.elasticModulus as unknown as number,
+      yieldStrength: newMaterialParams.yieldStrength as unknown as number,
+      density: newMaterialParams.density as unknown as number,
+    };
+    onMaterialParametersChange(materialParamsParent);
     onCalculate();
-    //onCalculate();
   };
 
   return (
     <Card className="w-full bg-white shadow-md">
-      <CardContent className="p-6">
-        <div className="space-y-6">
+      <CardContent>
+        <div className="w-full bg-background p-4 rounded-lg">
           {/* Beam Dimensions Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-4">Beam Dimensions</h3>
+
+           <h2 className="text-xl font-semibold mb-4">Beam Dimensions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Units Toggle */}
               <div className="flex items-center justify-between mb-4 p-2 bg-muted rounded-md w-[400px]">
@@ -610,7 +553,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
                     onChange={(e) =>
                       handleDimensionChange(field.id, e.target.value)
                     }
-                    
+
                     className={`w-1/3 ${errors[field.id] ? "border-red-500" : ""}`}
                   />
                   {errors[field.id] && (
@@ -619,7 +562,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
                 </div>
               ))}
             </div>
-          </div>
+
 
           {/* Loading Conditions Section */}
           <div>
@@ -636,7 +579,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem
-                      value="point-load"
+                      value="point"
                       className="flex items-center"
                     >
                       <div className="flex items-center">
@@ -740,6 +683,7 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
                       handleMaterialPropertyChange(field.id, e.target.value)
                     }
                     className={`w-1/3 ${errors[field.id] ? "border-red-500" : ""}`}
+                    disabled={materialType !== "custom"}
                   />
 
                   {errors[field.id] && (

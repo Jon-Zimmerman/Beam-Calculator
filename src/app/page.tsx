@@ -15,9 +15,9 @@ export default function Home() {
             sections under different loading conditions.
           </p>
         </header>
-        <div className="bg-card rounded-xl shadow-lg border border-border p-6 md:p-8">
+        {/* <div className="bg-card rounded-xl shadow-lg border border-border p-6 md:p-8"> */}
           <BeamCalculator />
-        </div>
+        {/* </div> */}
       </div>
       <footer className="text-center text-sm text-muted-foreground pt-8 pb-4 bottom-1.5 static">
         <p>

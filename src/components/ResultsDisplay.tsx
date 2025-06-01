@@ -30,9 +30,20 @@ const ResultsDisplay = ({
   beamParameters,
   loadingParameters,
 }: ResultsDisplayProps) => {
+  // Helper to format large numbers in scientific notation
+  const formatLargeNumber = (val: number | undefined, digits = 3) => {
+    if (typeof val === "number" && Math.abs(val) >= 1000) {
+      return val.toExponential(digits);
+    }
+    if (typeof val === "number") {
+      return val.toFixed(digits);
+    }
+    return val;
+  };
+
   return (
-    <div className="w-full bg-background rounded-lg border border-border p-4">
-      <Card>
+    <div >
+
         <CardHeader>
           <CardTitle className="text-xl font-bold">
             Calculation Results: {beamType} under {loadType}
@@ -51,7 +62,7 @@ const ResultsDisplay = ({
                     Maximum Stress
                   </h3>
                   <p className="text-2xl font-bold">
-                    {result.maxStress.toFixed(3)}{" "}
+                    {formatLargeNumber(result.maxStress, 1)}{" "}
                     <span className="text-sm font-normal">MPa</span>
                   </p>
                 </div>
@@ -60,7 +71,7 @@ const ResultsDisplay = ({
                     Maximum Deflection
                   </h3>
                   <p className="text-2xl font-bold">
-                    {result.maxDeflection?.toFixed(2)}{" "}
+                    {formatLargeNumber(result.maxDeflection, 2)}{" "}
                     <span className="text-sm font-normal">mm</span>
                   </p>
                 </div>
@@ -69,7 +80,7 @@ const ResultsDisplay = ({
                     Moment of Inertia
                   </h3>
                   <p className="text-2xl font-bold">
-                    {result.momentOfInertia.toFixed(2)}{" "}
+                    {formatLargeNumber(result.momentOfInertia, 2)}{" "}
                     <span className="text-sm font-normal">mm⁴</span>
                   </p>
                 </div>
@@ -78,7 +89,7 @@ const ResultsDisplay = ({
                     Section Modulus
                   </h3>
                   <p className="text-2xl font-bold">
-                    {result.sectionModulus.toFixed(2)}{" "}
+                    {formatLargeNumber(result.sectionModulus, 2)}{" "}
                     <span className="text-sm font-normal">mm³</span>
                   </p>
                 </div>
@@ -162,7 +173,6 @@ const ResultsDisplay = ({
             </ul>
           </div>
         </CardContent>
-      </Card>
 
       <style jsx>{`
         .clip-arrow {
