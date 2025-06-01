@@ -19,10 +19,11 @@ export const beamList = [
 export type BeamList = (typeof beamList)[number];
 
 export type LoadingType = "point" | "distributed" | "moment";
-
+export type MaterialType = "steel" | "aluminum" | "wood" | "custom";
 export interface BeamParameters {
   height?: number;
   width?: number;
+  length?: number;
   flangeThickness?: number;
   webThickness?: number;
   diameter?: number;
@@ -36,7 +37,14 @@ export interface LoadingParameters {
   position?: number;
   startPosition?: number;
   endPosition?: number;
-  length: number;
+  //length: number;
+}
+
+export interface MaterialParameters {
+  type: MaterialType;
+  elasticModulus: number; // Young's modulus in GPa
+  yieldStrength: number; // Yield strength in MPa
+  density?: number; //TODO
 }
 
 export interface CalculationResult {
@@ -55,8 +63,15 @@ const BeamCalculator = () => {
     {
       type: "point",
       magnitude: 10,
-      position: 1,
-      length: 1,
+      position: 1
+    },
+  );
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialType>("aluminum");
+  const [materialParameters, setMaterialParameters] = useState<MaterialParameters>(
+    {
+      type: "steel",
+      elasticModulus: 200, // GPa
+      yieldStrength: 250, // MPa
     },
   );
   const [calculationResult, setCalculationResult] =
@@ -84,13 +99,17 @@ const BeamCalculator = () => {
   const handleParameterChange = (params: BeamParameters) => {
     console.log("Beam parameters changed:", params);
     setBeamParameters(params);
+    //console.log(beamParameters)
   };
 
   const handleLoadingChange = (params: LoadingParameters) => {
     console.log("Load parameters changed:", params);
     setLoadingParameters(params);
   };
-
+  const handleMaterialChange = (params: MaterialParameters) => {
+    console.log("Material parameters changed:", params);  
+    setMaterialParameters(params);
+  };
   function isBeamType(value: string): value is BeamList {
     return beamList.includes(value as BeamList);
   }
@@ -104,13 +123,15 @@ const BeamCalculator = () => {
     if (
       selectedBeamType === "rectangular" &&
       beamParameters.width &&
-      beamParameters.height
+      beamParameters.height && 
+      beamParameters.length
     ) {
+
       // I = bh³/12 for rectangular section
       momentOfInertia =
-        (beamParameters.width * Math.pow(beamParameters.height, 3)) / 12;
+        (beamParameters.width * Math.pow(beamParameters.height, 3)) / 12; //verified
       // S = I/(h/2) for rectangular section
-      sectionModulus = momentOfInertia / (beamParameters.height / 2);
+      sectionModulus = momentOfInertia / (beamParameters.height / 2); //verified
     } else if (selectedBeamType === "circular" && beamParameters.diameter) {
       // I = πd⁴/64 for circular section
       const radius = beamParameters.diameter / 2;
@@ -140,19 +161,20 @@ const BeamCalculator = () => {
     let maxMoment = 0;
     if (
       loadingParameters.type === "point" &&
-      loadingParameters.position &&
-      loadingParameters.length
+      loadingParameters.position //&&
+      //loadingParameters.length
     ) {
       // M = PL/4 for centered point load (simplified)
       maxMoment =
         (loadingParameters.magnitude *
-          loadingParameters.position *
-          (loadingParameters.length - loadingParameters.position)) /
-        loadingParameters.length;
+        loadingParameters.position);
+        //  *
+        //   (loadingParameters.length - loadingParameters.position)) /
+        // loadingParameters.length;
     } else if (loadingParameters.type === "distributed") {
       // M = wL²/8 for uniformly distributed load
       maxMoment =
-        (loadingParameters.magnitude * Math.pow(loadingParameters.length, 2)) /
+        (loadingParameters.magnitude * Math.pow(beamParameters.length as number, 2)) /
         8;
     } else if (loadingParameters.type === "moment") {
       // Direct moment application
@@ -166,7 +188,7 @@ const BeamCalculator = () => {
       momentOfInertia,
       sectionModulus,
       maxDeflection:
-        (maxMoment * Math.pow(loadingParameters.length, 2)) /
+        (maxMoment * Math.pow(beamParameters.length as number, 2)) /
         (8 * momentOfInertia * 200000), // E assumed as 200 GPa
     });
   };
@@ -200,8 +222,11 @@ const BeamCalculator = () => {
                 beamType={selectedBeamType}
                 beamParameters={beamParameters}
                 loadingParameters={loadingParameters}
+                materialType={selectedMaterial}
+                materialParameters={materialParameters}
                 onBeamParametersChange={handleParameterChange}
                 onLoadingParametersChange={handleLoadingChange}
+                onMaterialParametersChange={handleMaterialChange}
                 onCalculate={calculateResults}
                 resultsRef={resultsRef}
               />
