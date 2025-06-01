@@ -155,15 +155,24 @@ const ResultsDisplay = ({
                   <div className="flex flex-col items-center" style={{ width: 0 }}>
                     {/* Vertical line */}
                     <div className="w-0 h-8 border-l-2 border-black"></div>
-                    {/* Label box */}
-                    <div className="mt-1 px-2 py-1 bg-white border border-gray-400 rounded shadow text-xs font-semibold text-gray-800 whitespace-nowrap">
+                    {/* Label box with label inside */}
+                    <div className="mt-1 px-2 py-1 bg-white border border-gray-400 rounded shadow text-xs font-semibold text-gray-800 whitespace-nowrap flex flex-col items-center">
+                      <span className="text-[11px] text-gray-700 font-semibold mb-0.5">Max Stress</span>
                       {formatLargeNumber(result.maxStress, 1)} MPa
                     </div>
                   </div>
                   {/* The rest of the bar is empty to fill space */}
                   <div className="flex-1"></div>
-
-
+                  {/* Max Deflection callout on the right */}
+                  <div className="flex flex-col items-center" style={{ width: 0 }}>
+                    {/* Vertical line */}
+                    <div className="w-0 h-8 border-l-2 border-black"></div>
+                    {/* Label box with label inside */}
+                    <div className="mt-1 px-2 py-1 bg-white border border-gray-400 rounded shadow text-xs font-semibold text-gray-800 whitespace-nowrap flex flex-col items-center">
+                      <span className="text-[11px] text-gray-700 font-semibold mb-0.5">Max Deflection</span>
+                      {formatLargeNumber(result.maxDeflection, 2)} mm
+                    </div>
+                  </div>
                 </div>
 
               </div>

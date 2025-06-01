@@ -18,6 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet" />
+      </head>
       <Script src="https://api.tempolabs.ai/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js" />
       <body className={inter.className}>
         {children}
@@ -25,4 +28,8 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+
+}    
+// </html>
+//   );
+// }

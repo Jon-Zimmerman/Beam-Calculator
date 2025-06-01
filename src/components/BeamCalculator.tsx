@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BeamSelectionGrid from "./BeamSelectionGrid";
 import ParameterInputForm from "./ParameterInputForm";
 import ResultsDisplay from "./ResultsDisplay";
+import DeflectionHome from "@/app/deflection-home";
 
 export const beamList = [
   "i-beam",
@@ -185,6 +186,7 @@ const BeamCalculator = () => {
         <CardTitle className="text-2xl font-bold text-center">
           Beam Strength Calculator
         </CardTitle>
+
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
