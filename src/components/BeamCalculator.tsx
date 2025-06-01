@@ -76,10 +76,10 @@ const BeamCalculator = () => {
   );
   const [calculationResult, setCalculationResult] =
     useState<CalculationResult>({
-      maxStress:0,
-      momentOfInertia:0,
-      sectionModulus:0,
-      maxDeflection:0
+      maxStress: 0,
+      momentOfInertia: 0,
+      sectionModulus: 0,
+      maxDeflection: 0
     });
   const [activeTab, setActiveTab] = useState("beam-selection");
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -107,7 +107,7 @@ const BeamCalculator = () => {
     setLoadingParameters(params);
   };
   const handleMaterialChange = (params: MaterialParameters) => {
-    console.log("Material parameters changed:", params);  
+    console.log("Material parameters changed:", params);
     setMaterialParameters(params);
   };
   function isBeamType(value: string): value is BeamList {
@@ -115,69 +115,70 @@ const BeamCalculator = () => {
   }
 
   useEffect(() => {
-  // Calculation logic here
-  let momentOfInertia = 0;
-  let sectionModulus = 0;
+    // Calculation logic here
+    let momentOfInertia = 0;
+    let sectionModulus = 0;
 
-  if (
-    selectedBeamType === "rectangular" &&
-    beamParameters.width &&
-    beamParameters.height &&
-    beamParameters.length
-  ) {
-    momentOfInertia =
-      (beamParameters.width * Math.pow(beamParameters.height, 3)) / 12;
-    sectionModulus = momentOfInertia / (beamParameters.height / 2);
-  } else if (selectedBeamType === "circular" && beamParameters.diameter) {
-    const radius = beamParameters.diameter / 2;
-    momentOfInertia = (Math.PI * Math.pow(radius, 4)) / 4;
-    sectionModulus = momentOfInertia / radius;
-  } else if (
-    selectedBeamType === "i-beam" &&
-    beamParameters.height &&
-    beamParameters.width &&
-    beamParameters.webThickness &&
-    beamParameters.flangeThickness
-  ) {
-    const h = beamParameters.height;
-    const b = beamParameters.width;
-    const tw = beamParameters.webThickness;
-    const tf = beamParameters.flangeThickness;
-    momentOfInertia =
-      (b * Math.pow(h, 3)) / 12 - ((b - tw) * Math.pow(h - 2 * tf, 3)) / 12;
-    sectionModulus = momentOfInertia / (h / 2);
-  }
+    if (
+      selectedBeamType === "rectangular" &&
+      beamParameters.width &&
+      beamParameters.height &&
+      beamParameters.length
+    ) {
+      momentOfInertia =
+        (beamParameters.width * Math.pow(beamParameters.height, 3)) / 12;
+      sectionModulus = momentOfInertia / (beamParameters.height / 2);
+    } else if (selectedBeamType === "circular" && beamParameters.diameter) {
+      const radius = beamParameters.diameter / 2;
+      momentOfInertia = (Math.PI * Math.pow(radius, 4)) / 4;
+      sectionModulus = momentOfInertia / radius;
+    } else if (
+      selectedBeamType === "i-beam" &&
+      beamParameters.height &&
+      beamParameters.width &&
+      beamParameters.webThickness &&
+      beamParameters.flangeThickness
+    ) {
+      const h = beamParameters.height;
+      const b = beamParameters.width;
+      const tw = beamParameters.webThickness;
+      const tf = beamParameters.flangeThickness;
+      momentOfInertia =
+        (b * Math.pow(h, 3)) / 12 - ((b - tw) * Math.pow(h - 2 * tf, 3)) / 12;
+      sectionModulus = momentOfInertia / (h / 2);
+    }
 
-  let maxMoment = 0;
-  if (
-    loadingParameters.type === "point" &&
-    loadingParameters.position
-  ) {
-    maxMoment = loadingParameters.magnitude * loadingParameters.position;
-  } else if (loadingParameters.type === "distributed") {
-    maxMoment =
-      (loadingParameters.magnitude * Math.pow(beamParameters.length as number, 2)) /
-      8;
-  } else if (loadingParameters.type === "moment") {
-    maxMoment = loadingParameters.magnitude;
-  }
+    let maxMoment = 0;
+    if (
+      loadingParameters.type === "point" &&
+      loadingParameters.position
+    ) {
+      maxMoment = loadingParameters.magnitude * loadingParameters.position;
+    } else if (loadingParameters.type === "distributed") {
+      maxMoment =
+        (loadingParameters.magnitude * Math.pow(beamParameters.length as number, 2)) /
+        8;
+    } else if (loadingParameters.type === "moment") {
+      maxMoment = loadingParameters.magnitude;
+    }
 
-  const maxStress = sectionModulus > 0 ? (maxMoment / sectionModulus) * 1000000 : 0;
-  //maxmoment is in Nm, momemnt of interia is in mm^4. put everything in mm or MPa
-  setCalculationResult({
-    maxStress,
-    momentOfInertia,
-    sectionModulus,
-    maxDeflection: // d = PL^3/3EI for fixed end point load at end
-      (maxMoment *1000 * Math.pow(beamParameters.length as number *1000 as number, 2)) /
-      (3 * momentOfInertia  * materialParameters.elasticModulus*1000), // E is in GPa
-  });
-}, [
-  selectedBeamType,
-  beamParameters,
-  loadingParameters,
-  materialParameters,
-]);
+    const maxStress = sectionModulus > 0 ? (maxMoment * 1000 / sectionModulus) : 0;
+
+    //maxmoment is in Nm, momemnt of interia is in mm^4. put everything in mm or MPa
+    setCalculationResult({
+      maxStress,
+      momentOfInertia,
+      sectionModulus,
+      maxDeflection: // d = PL^3/3EI for fixed end point load at end
+        (maxMoment * 1000 * Math.pow(beamParameters.length as number * 1000 as number, 2)) /
+        (3 * momentOfInertia * materialParameters.elasticModulus * 1000), // E is in GPa
+    });
+  }, [
+    selectedBeamType,
+    beamParameters,
+    loadingParameters,
+    materialParameters,
+  ]);
   return (
     <Card className="w-full max-w-6xl mx-auto bg-background border-border">
       <CardHeader>
@@ -197,14 +198,14 @@ const BeamCalculator = () => {
           <TabsContent value="beam-selection" className="space-y-4">
             <Card className="w-full bg-white shadow-md">
               <CardContent>
-<BeamSelectionGrid
-              selectedBeamType={selectedBeamType as BeamList}
-              onSelectBeam={handleBeamSelection}
-            />
+                <BeamSelectionGrid
+                  selectedBeamType={selectedBeamType as BeamList}
+                  onSelectBeam={handleBeamSelection}
+                />
               </CardContent>
 
             </Card>
-            
+
           </TabsContent>
 
           <TabsContent value="parameters" className="space-y-4">
@@ -218,7 +219,7 @@ const BeamCalculator = () => {
                 onBeamParametersChange={handleParameterChange}
                 onLoadingParametersChange={handleLoadingChange}
                 onMaterialParametersChange={handleMaterialChange}
-                onCalculate={() => {}}
+                onCalculate={() => { }}
                 resultsRef={resultsRef}
               />
             )}
@@ -226,15 +227,15 @@ const BeamCalculator = () => {
         </Tabs>
       </CardContent>
 
-<div ref={resultsRef}>
-<ResultsDisplay
-            beamType={selectedBeamType}
-            beamParameters={beamParameters}
-            loadingParameters={loadingParameters}
-            result={calculationResult}
-          />
-</div>
-          
+      <div ref={resultsRef}>
+        <ResultsDisplay
+          beamType={selectedBeamType}
+          beamParameters={beamParameters}
+          loadingParameters={loadingParameters}
+          result={calculationResult}
+        />
+      </div>
+
     </Card>
   );
 };

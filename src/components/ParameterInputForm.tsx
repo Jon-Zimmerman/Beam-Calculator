@@ -116,6 +116,11 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
             label: useImperial ? "Diameter (in)" : "Diameter (mm)",
             defaultValue: useImperial ? 3.94 : 100,
           },
+                    {
+            id: "length",
+            label: useImperial ? "Length (in)" : "Length (m)",
+            defaultValue: useImperial ? 36 : 1,//TODO
+          },
         ];
       case "hollow-rectangular":
         return [
@@ -134,6 +139,11 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
             label: useImperial ? "Wall Thickness (in)" : "Wall Thickness (mm)",
             defaultValue: useImperial ? 0.2 : 5,
           },
+                    {
+            id: "length",
+            label: useImperial ? "Length (in)" : "Length (m)",
+            defaultValue: useImperial ? 36 : 1,//TODO
+          },
         ];
       case "hollow-circular":
         return [
@@ -147,6 +157,11 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
             label: useImperial ? "Wall Thickness (in)" : "Wall Thickness (mm)",
             defaultValue: useImperial ? 0.2 : 5,
           },
+                    {
+            id: "length",
+            label: useImperial ? "Length (in)" : "Length (m)",
+            defaultValue: useImperial ? 36 : 1,//TODO
+          },
         ];
       default:
         return [
@@ -159,6 +174,11 @@ const ParameterInputForm: React.FC<ParameterInputFormProps> = ({
             id: "width",
             label: useImperial ? "Width (in)" : "Width (mm)",
             defaultValue: useImperial ? 1.97 : 50,
+          },
+                    {
+            id: "length",
+            label: useImperial ? "Length (in)" : "Length (m)",
+            defaultValue: useImperial ? 36 : 1,//TODO
           },
         ];
     }
